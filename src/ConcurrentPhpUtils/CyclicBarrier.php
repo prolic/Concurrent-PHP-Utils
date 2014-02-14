@@ -6,11 +6,6 @@ use Cond;
 use Mutex;
 use Thread;
 
-require_once __DIR__ . '/Exception/BrokenBarrierException.php';
-require_once __DIR__ . '/Exception/InterruptedException.php';
-require_once __DIR__ . '/Exception/InvalidArgumentException.php';
-require_once __DIR__ . '/Exception/TimeoutException.php';
-
 class CyclicBarrier extends NoOpStackable
 {
     /**
@@ -32,9 +27,16 @@ class CyclicBarrier extends NoOpStackable
      */
     public function __construct($parties, Thread $barrierAction = null)
     {
+        // pre-load all exceptions
+        spl_autoload_call(__NAMESPACE__ . '\Exception\BrokenBarrierException');
+        spl_autoload_call(__NAMESPACE__ . '\Exception\InterruptedException');
+        spl_autoload_call(__NAMESPACE__ . '\Exception\InvalidArgumentException');
+        spl_autoload_call(__NAMESPACE__ . '\Exception\TimeoutException');
+
         if ($parties <= 0) {
             throw new Exception\InvalidArgumentException();
         }
+        
         $this->parties = $parties;
         $this->count = $parties;
         $this->barrierCommand = $barrierAction;
