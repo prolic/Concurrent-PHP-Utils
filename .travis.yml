@@ -1,0 +1,24 @@
+language: php
+
+php:
+  - 5.4
+  - 5.5
+
+install:
+  - sudo apt-get install uuid-dev -y
+
+before_script:
+  - printf "\n" | pecl install uuid
+  - git clone https://github.com/krakjoe/pthreads lib-pthreads
+  - cd lib-pthreads
+  - phpize
+  - ./configure
+  - make
+  - sudo make install
+  - cd ..
+  - echo "extension = pthreads.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - composer self-update
+  - composer update --prefer-source --dev
+
+script:
+  - ./vendor/bin/phpunit
