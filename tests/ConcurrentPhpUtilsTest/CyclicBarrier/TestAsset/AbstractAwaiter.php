@@ -3,6 +3,7 @@
 namespace ConcurrentPhpUtilsTest\CyclicBarrier\TestAsset;
 
 use ConcurrentPhpUtils\CyclicBarrier;
+use ConcurrentPhpUtils\Exception;
 use Thread;
 
 abstract class AbstractAwaiter extends Thread
@@ -16,7 +17,7 @@ abstract class AbstractAwaiter extends Thread
      */
     public $atTheStartingGate;
 
-    public function setResult(\Exception $result)
+    public function setResult($result)
     {
         $this->result = $result;
     }
@@ -29,6 +30,11 @@ abstract class AbstractAwaiter extends Thread
     public function getName()
     {
         return $this->name;
+    }
+
+    public function kill()
+    {
+        parent::kill();
     }
 
     public function toTheStartingGate()

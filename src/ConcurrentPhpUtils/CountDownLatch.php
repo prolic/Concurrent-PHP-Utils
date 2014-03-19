@@ -2,7 +2,7 @@
 
 namespace ConcurrentPhpUtils;
 
-class CountDownLatch extends NoOpStackable
+class CountDownLatch extends \Threaded
 {
     /**
      * @var int

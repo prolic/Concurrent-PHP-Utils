@@ -6,7 +6,12 @@ use Cond;
 use Mutex;
 use Thread;
 
-class CyclicBarrier extends NoOpStackable
+require_once __DIR__ . '/Exception/BrokenBarrierException.php';
+require_once __DIR__ . '/Exception/InterruptedException.php';
+require_once __DIR__ . '/Exception/InvalidArgumentException.php';
+require_once __DIR__ . '/Exception/TimeoutException.php';
+
+class CyclicBarrier extends \Threaded
 {
     /**
      * @var int the lock for guarding the barrier entry
@@ -27,16 +32,9 @@ class CyclicBarrier extends NoOpStackable
      */
     public function __construct($parties, Thread $barrierAction = null)
     {
-        // pre-load all exceptions
-        spl_autoload_call(__NAMESPACE__ . '\Exception\BrokenBarrierException');
-        spl_autoload_call(__NAMESPACE__ . '\Exception\InterruptedException');
-        spl_autoload_call(__NAMESPACE__ . '\Exception\InvalidArgumentException');
-        spl_autoload_call(__NAMESPACE__ . '\Exception\TimeoutException');
-
         if ($parties <= 0) {
             throw new Exception\InvalidArgumentException();
         }
-        
         $this->parties = $parties;
         $this->count = $parties;
         $this->barrierCommand = $barrierAction;
@@ -95,8 +93,7 @@ class CyclicBarrier extends NoOpStackable
      */
     public function breakBarrier()
     {
-        $g = $this->generation;
-        $b = $g->broken = true;
+        $this->generation->broken = true;
         $this->count = $this->parties;
         Cond::broadcast($this->cond);
     }
@@ -124,88 +121,88 @@ class CyclicBarrier extends NoOpStackable
         $m = $this->mutex;
         Mutex::lock($m);
 
-        $that = $this;
-        register_shutdown_function(function() use ($that) {
-            $that->breakBarrier();
-        });
-
-        $g = $this->generation;
-        if ($g->broken) {
-            Mutex::unlock($this->mutex);
-            register_shutdown_function(function() {
-                exit();
-            });
-            throw new Exception\BrokenBarrierException();
-        }
-
-        $index = --$this->count;
-
-        if ($index == 0) { // tripped
-            $ranAction = false;
-
-            try {
-                if (null !== $this->barrierCommand) {
-                    $this->barrierCommand->start();
-                }
-                $ranAction = true;
-                $this->nextGeneration();
-                Mutex::unlock($this->mutex);
-                register_shutdown_function(function() {
-                    exit();
-                });
-                return 0;
-            } catch (\Exception $e) {
-                if (!$ranAction) {
-                    $this->breakBarrier();
-                }
-                Mutex::unlock($this->mutex);
-                register_shutdown_function(function() {
-                    exit();
-                });
-                throw $e;
-            }
-        }
-
-        // loop until tripped, broken or timed out
-        for (;;) {
-            $newG = $this->generation;
-            register_shutdown_function(function() use ($that, $g, $newG) {
-               if ($g === $newG && !$g->broken) {
-                   $that->breakBarrier();
-               }
-            });
-
-            if (null === $timeout) {
-                Cond::wait($this->cond, $this->mutex);
-            } else {
-                Cond::wait($this->cond, $this->mutex, $timeout);
-            }
+        try {
+            $g = $this->generation;
 
             if ($g->broken) {
-                Mutex::unlock($this->mutex);
-                register_shutdown_function(function() {
-                    exit();
-                });
                 throw new Exception\BrokenBarrierException();
             }
 
-            if ($g !== $this->generation) {
-                Mutex::unlock($this->mutex);
-                register_shutdown_function(function() {
-                    exit();
-                });
-                return $index;
+            $t = Thread::getCurrentThread();
+            if ($t instanceof Thread && $t->isTerminated()) {
+                $this->breakBarrier();
+                throw new Exception\InterruptedException(
+                    'thread was interrupted'
+                );
             }
 
-            if (null !== $timeout) {
-                $this->breakBarrier();
-                Mutex::unlock($this->mutex);
-                register_shutdown_function(function() {
-                    exit();
-                });
-                throw new Exception\TimeoutException();
+            $index = --$this->count;
+            if ($index == 0) { // tripped
+                $ranAction = false;
+                try {
+                    if (null !== $this->barrierCommand) {
+                        $this->barrierCommand->start();
+                    }
+                    $ranAction = true;
+                    $this->nextGeneration();
+                    if (!$ranAction) {
+                        $this->breakBarrier();
+                    }
+                    Mutex::unlock($this->mutex);
+                    return 0;
+                } catch (\Exception $e) {
+                    if (!$ranAction) {
+                        $this->breakBarrier();
+                    }
+                    throw $e;
+                }
             }
+
+            // loop until tripped, broken or timed out
+            for (;;) {
+
+                try {
+                    Cond::wait($this->cond, $this->mutex, $timeout);
+                } catch (\RuntimeException $e) {
+                    if ($e->getMessage() != 'pthreads detected a timeout while waiting for condition') {
+                        throw $e;
+                    }
+                }
+
+                $t = Thread::getCurrentThread();
+                if ($t instanceof Thread && $t->isTerminated()) {
+                    $this->breakBarrier();
+                    throw new Exception\InterruptedException(
+                        'thread was interrupted'
+                    );
+                }
+
+                if ($this->isTerminated()) {
+                    $this->breakBarrier();
+                    throw new Exception\InterruptedException(
+                        'thread was interrupted'
+                    );
+                }
+
+                if ($g->broken) {
+                    throw new Exception\BrokenBarrierException();
+                }
+
+                if ($g !== $this->generation) {
+                    Mutex::unlock($this->mutex);
+                    return $index;
+                }
+
+                if (null !== $timeout) {
+                    $this->breakBarrier();
+                    throw new Exception\TimeoutException();
+                }
+            }
+        } catch (\Exception $e) {
+            Mutex::unlock($this->mutex);
+            throw $e;
         }
+        Mutex::unlock($this->mutex);
     }
 
     /**

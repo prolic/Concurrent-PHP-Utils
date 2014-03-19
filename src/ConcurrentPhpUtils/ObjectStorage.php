@@ -2,15 +2,17 @@
 
 namespace ConcurrentPhpUtils;
 
-class ObjectStorage extends NoOpStackable
+use Threaded;
+
+class ObjectStorage extends Threaded
 {
     /**
-     * @var NoOpStackable
+     * @var Threaded
      */
     public $data;
 
     /**
-     * @var NoOpStackable
+     * @var Threaded
      */
     public $info;
 
@@ -19,18 +21,18 @@ class ObjectStorage extends NoOpStackable
      */
     public function __construct()
     {
-        $this->data = new NoOpStackable();
-        $this->info = new NoOpStackable();
+        $this->data = new Threaded();
+        $this->info = new Threaded();
     }
 
     /**
      * Adds an object in the storage
      *
-     * @param UuidNoOpStackable $object
+     * @param UuidThreaded $object
      * @param mixed $data [optional]
      * @return void
      */
-    public function attach(UuidNoOpStackable $object, $data = null)
+    public function attach(UuidThreaded $object, $data = null)
     {
         $this->data[] = $object;
         $this->info[] = $data;
@@ -39,10 +41,10 @@ class ObjectStorage extends NoOpStackable
     /**
      * Removes an object from the storage
      *
-     * @param UuidNoOpStackable $object
+     * @param UuidThreaded $object
      * @return void
      */
-    public function detach(UuidNoOpStackable $object)
+    public function detach(UuidThreaded $object)
     {
         foreach ($this->data as $key => $value) {
             if ($value === $object) {
@@ -55,10 +57,10 @@ class ObjectStorage extends NoOpStackable
     /**
      * Checks if the storage contains a specific object
      *
-     * @param UuidNoOpStackable $object
+     * @param UuidThreaded $object
      * @return bool true if the object is in the storage, false otherwise.
      */
-    public function contains(UuidNoOpStackable $object)
+    public function contains(UuidThreaded $object)
     {
         foreach ($this->data as $value) {
             if ($value === $object) {
@@ -120,10 +122,10 @@ class ObjectStorage extends NoOpStackable
     /**
      * Returns the data associated with the current iterator entry
      *
-     * @param UuidNoOpStackable $object
+     * @param UuidThreaded $object
      * @return mixed The data associated with the current iterator position.
      */
-    public function getInfo(UuidNoOpStackable $object)
+    public function getInfo(UuidThreaded $object)
     {
         foreach ($this->data as $key => $value) {
             if ($object->equals($value)) {
@@ -135,11 +137,11 @@ class ObjectStorage extends NoOpStackable
     /**
      * Sets the data associated with the current iterator entry
      *
-     * @param UuidNoOpStackable $object
+     * @param UuidThreaded $object
      * @param mixed $data
      * @return void
      */
-    public function setInfo(UuidNoOpStackable $object, $data)
+    public function setInfo(UuidThreaded $object, $data)
     {
         foreach ($this->data as $key => $value) {
             if ($object->equals($value)) {

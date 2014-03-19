@@ -3,10 +3,9 @@
 namespace ConcurrentPhpUtilsTest\CyclicBarrier\TestAsset;
 
 use ConcurrentPhpUtils\CyclicBarrier;
-use ConcurrentPhpUtils\NoOpStackable;
 use ConcurrentPhpUtils\TimeUnit;
 
-class FunTwo extends NoOpStackable
+class FunTwo extends \Threaded
 {
     /**
      * @var CyclicBarrier

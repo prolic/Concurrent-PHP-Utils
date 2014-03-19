@@ -3,12 +3,11 @@
 namespace ConcurrentPhpUtilsTest\CyclicBarrier\TestAsset;
 
 use ConcurrentPhpUtils\CyclicBarrier;
-use ConcurrentPhpUtils\NoOpStackable;
 
 /**
  * Returns an infinite lazy list of all possible awaiter pair combinations.
  */
-class AwaiterIterator extends NoOpStackable
+class AwaiterIterator extends \Threaded
 {
     public $i;
 

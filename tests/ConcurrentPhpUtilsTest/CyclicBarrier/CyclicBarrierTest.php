@@ -5,7 +5,6 @@ namespace ConcurrentPhpUtilsTest\CyclicBarrier;
 use Cond;
 use Mutex;
 use ConcurrentPhpUtils\CyclicBarrier;
-use ConcurrentPhpUtils\NoOpStackable;
 use ConcurrentPhpUtilsTest\CyclicBarrier\TestAsset\AbstractAwaiter;
 use ConcurrentPhpUtilsTest\CyclicBarrier\TestAsset\AwaiterIterator;
 use ConcurrentPhpUtilsTest\CyclicBarrier\TestAsset\FunOne;
@@ -27,7 +26,7 @@ class CyclicBarrierTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($barrier->isBroken());
         $this->assertEquals($barrier->getNumberWaiting(), 0);
 
-        $funStack = new NoOpStackable();
+        $funStack = new \Threaded();
         $funStack[] = new FunOne($barrier);
         $funStack[] = new FunTwo($barrier);
 
@@ -43,14 +42,14 @@ class CyclicBarrierTest extends \PHPUnit_Framework_TestCase
     {
         $t = $a->getResult();
 
-        if (! (($t === null && $c === null) || ($c !== null && $t instanceof $c))) {
+        if (! (($t === null && $c === null) || ($c !== null && $t == $c))) {
             $this->fail(
-                'Mismatch in thread ' . $a->getName() . ': ' . get_class($t) . ', ' . ($c === null ? '<null>' : $c)
+                'Mismatch in thread ' . $a->getName() . ': ' . $t . ', ' . ($c === null ? '<null>' : $c)
             );
         }
     }
 
-    protected function throws($exceptionClassname, NoOpStackable $funStack)
+    protected function throws($exceptionClassname, \Threaded $funStack)
     {
         foreach ($funStack as $fun) {
             try {
@@ -137,7 +136,6 @@ class CyclicBarrierTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    /* @todo: failing, find out, how to work with killed threads
     public function testOneThreadKilled()
     {
         $barrier = new CyclicBarrier(3);
@@ -155,12 +153,11 @@ class CyclicBarrierTest extends \PHPUnit_Framework_TestCase
             $a1->join();
             $a2->join();
 
-            $this->checkResult($a1, null); // should be interupted exception
+            $this->checkResult($a1, 'ConcurrentPhpUtils\Pthreads\Exception\InterruptedException');
             $this->checkResult($a2, 'ConcurrentPhpUtils\Pthreads\Exception\BrokenBarrierException');
             $this->checkBroken($barrier);
             $this->reset($barrier);
         }
 
     }
-    */
 }

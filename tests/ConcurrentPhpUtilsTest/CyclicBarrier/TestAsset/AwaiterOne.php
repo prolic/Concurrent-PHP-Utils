@@ -23,18 +23,9 @@ class AwaiterOne extends AbstractAwaiter
     {
         $this->toTheStartingGate();
         try {
-            $that = $this;
-            register_shutdown_function(function() use ($that) {
-                echo 'm�h';
-                $that->setResult(new InterruptedException());
-                var_dump($that->result);
-            });
             $this->barrier->await();
-            register_shutdown_function(function() {
-                exit();
-            });
         } catch (\Exception $e) {
-            $this->setResult($e);
+            $this->setResult(get_class($e));
         }
     }
 }

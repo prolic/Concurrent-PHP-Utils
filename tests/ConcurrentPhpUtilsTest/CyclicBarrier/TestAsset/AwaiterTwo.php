@@ -26,16 +26,10 @@ class AwaiterTwo extends AbstractAwaiter
     {
         $this->toTheStartingGate();
         try {
-            $that = $this;
-            register_shutdown_function(function() use ($that) {
-                $that->setResult(new InterruptedException());
-            });
             $this->barrier->await($this->micros);
-            register_shutdown_function(function() {
-                exit();
-            });
         } catch (\Exception $e) {
-            $this->setResult($e);
+            var_dump($e);
+            $this->setResult(get_class($e));
         }
     }
 }

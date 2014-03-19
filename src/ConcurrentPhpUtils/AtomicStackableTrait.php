@@ -2,14 +2,8 @@
 
 namespace ConcurrentPhpUtils;
 
-use Stackable;
-
 trait AtomicStackableTrait
 {
-    public function run()
-    {
-    }
-
     /**
      * Performs a compare and swap operation on a class member
      *

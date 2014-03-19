@@ -2,7 +2,9 @@
 
 namespace ConcurrentPhpUtils;
 
-class UuidNoOpStackable extends NoOpStackable
+use Threaded;
+
+class UuidThreaded extends Threaded
 {
     /**
      * @var string
@@ -18,9 +20,9 @@ class UuidNoOpStackable extends NoOpStackable
     }
 
     /**
-     * check if two stackables are the same
+     * Check if two stackables are the same
      *
-     * @param UuidNoOpStackable $other
+     * @param UuidThreaded $other
      * @return bool
      */
     public function equals(self $other)
