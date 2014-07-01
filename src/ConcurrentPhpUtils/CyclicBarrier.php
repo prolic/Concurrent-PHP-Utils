@@ -177,13 +177,6 @@ class CyclicBarrier extends \Threaded
                     );
                 }
 
-                if ($this->isTerminated()) {
-                    $this->breakBarrier();
-                    throw new Exception\InterruptedException(
-                        'thread was interrupted'
-                    );
-                }
-
                 if ($g->broken) {
                     throw new Exception\BrokenBarrierException();
                 }
