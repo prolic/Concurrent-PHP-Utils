@@ -2,14 +2,19 @@
 
 namespace ConcurrentPhpUtils;
 
-trait AtomicStackableTrait
+/**
+ * Trait CasThreadedMemberTrait
+ *
+ * This trait is intended to use with Threaded, Thread and Worker classes (pthreads)
+ */
+trait CasThreadedMemberTrait
 {
     /**
      * Performs a compare and swap operation on a class member
      *
-     * @param $member
-     * @param $oldValue
-     * @param $newValue
+     * @param string $member
+     * @param mixed $oldValue
+     * @param mixed $newValue
      * @return bool
      */
     public function casMember($member, $oldValue, $newValue)

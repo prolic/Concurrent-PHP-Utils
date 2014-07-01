@@ -28,11 +28,11 @@ class ObjectStorage extends Threaded
     /**
      * Adds an object in the storage
      *
-     * @param UuidThreaded $object
+     * @param Threaded $object
      * @param mixed $data [optional]
      * @return void
      */
-    public function attach(UuidThreaded $object, $data = null)
+    public function attach(Threaded $object, $data = null)
     {
         $this->data[] = $object;
         $this->info[] = $data;
@@ -41,10 +41,10 @@ class ObjectStorage extends Threaded
     /**
      * Removes an object from the storage
      *
-     * @param UuidThreaded $object
+     * @param Threaded $object
      * @return void
      */
-    public function detach(UuidThreaded $object)
+    public function detach(Threaded $object)
     {
         foreach ($this->data as $key => $value) {
             if ($value === $object) {
@@ -57,10 +57,10 @@ class ObjectStorage extends Threaded
     /**
      * Checks if the storage contains a specific object
      *
-     * @param UuidThreaded $object
+     * @param Threaded $object
      * @return bool true if the object is in the storage, false otherwise.
      */
-    public function contains(UuidThreaded $object)
+    public function contains(Threaded $object)
     {
         foreach ($this->data as $value) {
             if ($value === $object) {
@@ -122,13 +122,13 @@ class ObjectStorage extends Threaded
     /**
      * Returns the data associated with the current iterator entry
      *
-     * @param UuidThreaded $object
+     * @param Threaded $object
      * @return mixed The data associated with the current iterator position.
      */
-    public function getInfo(UuidThreaded $object)
+    public function getInfo(Threaded $object)
     {
         foreach ($this->data as $key => $value) {
-            if ($object->equals($value)) {
+            if ($object === $value) {
                 return $this->info[$key];
             }
         }
@@ -137,11 +137,11 @@ class ObjectStorage extends Threaded
     /**
      * Sets the data associated with the current iterator entry
      *
-     * @param UuidThreaded $object
+     * @param Threaded $object
      * @param mixed $data
      * @return void
      */
-    public function setInfo(UuidThreaded $object, $data)
+    public function setInfo(Threaded $object, $data)
     {
         foreach ($this->data as $key => $value) {
             if ($object->equals($value)) {
