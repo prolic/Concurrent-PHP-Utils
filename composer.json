@@ -15,7 +15,7 @@
         "php": ">=5.4.0",
         "ext-uuid": ">=1.0.3",
         "ext-pthreads": ">=2.0.8",
-        "marc-mabe/php-enum": "1.0.*"
+        "marc-mabe/php-enum": "1.2.*"
     },
     "require-dev": {
         "phpunit/phpunit": ">=3.7",
