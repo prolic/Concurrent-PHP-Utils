@@ -14,7 +14,6 @@ Port of the java.util.concurrent for php based on pthreads-extension
 Requirements
 ------------
 
-- PHP 5.3 ZTS
-- ext-pthreads 2.0.2
-- ext-uuid 1.0.3
-- MabeEnum
+- PHP 5.4 ZTS
+- ext-pthreads 2.0.8
+- php-enum 1.2.0
